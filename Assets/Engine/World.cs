@@ -18,17 +18,17 @@ public class World : MonoBehaviour{
     }
 
     void Start(){
-    	// for(int i = 0; i < 13; i++){
-    	// 	for(int j = 0; j < 13; j++){
-    	// 		CreateChunk(new Vector3(i,0,j));
-		   //  	CreateChunk(new Vector3(i,1,j));
-		   //  	CreateChunk(new Vector3(i,2,j)); 
-		   //  	CreateChunk(new Vector3(i,-1,j));		
-    	// 	}
-    	// }
-    	
-    	// MakeTestChunkAO();	    	
+        // for(int i = 0; i < 13; i++){
+        // 	for(int j = 0; j < 13; j++){
+        // 		CreateChunk(new Vector3(i,0,j));
+        //  	CreateChunk(new Vector3(i,1,j));
+        //  	CreateChunk(new Vector3(i,2,j)); 
+        //  	CreateChunk(new Vector3(i,-1,j));		
+        // 	}
+        // }
 
+        // MakeTestChunkAO();	    	
+        ThreadPool.SetMaxThreads(4, 4);
     }
 
     void Update(){

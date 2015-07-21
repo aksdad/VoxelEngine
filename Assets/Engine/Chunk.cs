@@ -109,21 +109,9 @@ public class Chunk : MonoBehaviour{
 						float ao4;
 						if(block == 1){
 							color = Color.green;
-                            //color.g -= 0.2f;
                             color.r = Mathf.Min(0.4f,Mathf.PerlinNoise((pos.x * 32f + x)/25.05f, (pos.z * 32f + z)/ 25.05f));
                             color.g -= Mathf.Min(0.4f, Mathf.PerlinNoise((pos.x * 32f + x)/85.05f, (pos.z * 32f + z)/ 85.05f));
-                            //Debug.Log(color.r);
-                            //color = new Color((float)96f/255f, (float)159f/255f, (float)112f/255f, 1f);
-                            // color.r += 0.3f;
-                            // color.b += 0.3f;
-                            // int r = World.GetNoise((Mathf.FloorToInt(pos.x * 32f) + x), (Mathf.FloorToInt(pos.y * 32f) + y), (Mathf.FloorToInt(pos.z * 32f) + z),  0.03f, 255, 1);
-                            // int b = World.GetNoise(Mathf.FloorToInt(pos.x * 32f) + x, Mathf.FloorToInt(pos.y * 32f) + y, Mathf.FloorToInt(pos.z * 32f) + z,  0.22f, 100, 1);
-                            // r  = (int)Mathf.Max(0f, (float)(r-30));
-                            // Debug.Log(r);
-                            // color.g = g/255f;
-                            // color.r = r/255f;
-                            // color.b += (float)(b/255f);
-                            // Debug.Log(color.r);
+                            
                         }
 						else if(block == 2){
 							color = new Color32(128, 91, 61, 255);
@@ -159,7 +147,6 @@ public class Chunk : MonoBehaviour{
 
 							if(ao1 + ao3 < ao2 + ao4){
                         		meshData.CreateFace(vPos, new Vector3(0,1,0), new Vector3(0,1,1), new Vector3(1,1,1), new Vector3(1,1,0), colors, true);
-                        		// Debug.Log("flipped");
 							}
                         	else
                         		meshData.CreateFace(vPos, new Vector3(0,1,0), new Vector3(0,1,1), new Vector3(1,1,1), new Vector3(1,1,0), colors, false);
@@ -254,10 +241,7 @@ public class Chunk : MonoBehaviour{
 							if(GetBlock(x, y - 1, z - 1) != 0){side2 = 1;}else{side2 = 0;}
 							if(GetBlock(x + 1, y - 1, z - 1) != 0){corner = 1;}else{corner = 0;}
 							ao4 = vertexAO(side1, side2, corner);
-
-							// if(x == 3 && z == 2)
-							// 	Debug.Log(ao4);
-							
+                            
 							colors[3] = new Color(color.r * ao4, color.g * ao4, color.b * ao4, color.a);
 							if(ao1 + ao3 > ao2 + ao4){
 					    		meshData.CreateFace(vPos, new Vector3(0,0,0), new Vector3(0,1,0), new Vector3(1,1,0), new Vector3(1,0,0), colors, true);
