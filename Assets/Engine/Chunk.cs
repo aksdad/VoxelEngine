@@ -93,7 +93,6 @@ public class Chunk : MonoBehaviour{
 				for(int z = 0; z < Size; z++){
 					int block = GetBlock(x, y, z);
 					if(block != 0){
-						bool build = false;
 						int top = GetBlock(x, y + 1, z);
 						int bot = GetBlock(x, y - 1, z);
 						int front = GetBlock(x, y, z + 1);
