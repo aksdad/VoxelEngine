@@ -35,4 +35,8 @@ public struct mBlock {
         this.b = color.b;
         solid = true;
     }
+
+    public static implicit operator bool (mBlock block) {
+        return block.solid;
+    }
 }
