@@ -1,105 +1,82 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using System;
-using System.Threading;
 
-public class Chunk : MonoBehaviour{
-	public const int Size = 32;
+public class ModelChunk : MonoBehaviour {
+    public const int Size = 32;
 
-	public bool generated = false;
-	public bool rendered = false;
-	public bool busy = false;
-	public bool delete = false;
-	public bool meshReady = false;
-	public bool loaded = false;
-	public Vector3 pos;
-	MeshData meshData = new MeshData();
+    MeshData meshData = new MeshData();
+    MeshFilter filter;
+    MeshCollider coll;
 
-	MeshFilter filter;
-	MeshCollider coll;
+    public bool delete = false;
 
-	public Block[,,] blocks = new Block[Size, Size, Size];
+    public mBlock[,,] blocks = new mBlock[Size, Size, Size];
 
-	void Start(){
-		filter = gameObject.GetComponent<MeshFilter>();
-		coll = gameObject.GetComponent<MeshCollider>();
+	// Use this for initialization
+	void Start () {
+        filter = gameObject.GetComponent<MeshFilter>();
+        coll = gameObject.GetComponent<MeshCollider>();
+	}
+	
+	// Update is called once per frame
+	void Update () {
+        if (delete) {
+            Destroy(filter.sharedMesh);
+            Destroy(gameObject);
+        }
 	}
 
-	void Update(){
-		if(delete){
-			Destroy(filter.sharedMesh);
-			Destroy(gameObject);
-		}
+    public mBlock GetBlock(float x, float y, float z){
+        if (x >= Size || y >= Size || z >= Size || x < 0 || y < 0 || z < 0)
+            return new mBlock(false);
+        mBlock block = blocks[(int)x, (int)y, (int)z];
+        return block;
+    }
 
-		if(meshReady){
-			meshReady = false;
-			RenderMesh();
-			meshData = new MeshData();
-			busy = false;
-		}
-	}
+    public Color GetBlockColor(float x, float y, float z) {
+        mBlock b = GetBlock(x, y, z);
+        if (b.solid) {
+            return new Color(b.r, b.g, b.b);
+        }
 
-	public Block GetBlock(float x, float y, float z){
-		if(x >= Size || y >= Size || z >= Size || x < 0 || y < 0 || z < 0)
-			return new Block(0);
-		Block block = blocks[(int)x, (int)y, (int)z];
-		return block;
-	}
+        return Color.white;
+    }
 
-	public void RenderChunk(){
-		if(!busy){
-			rendered = true;
-			busy = true;
-			//TODO: Thread this part
-			// Thread thread = new Thread(()=>{
-				BuildMeshData();
-				meshReady = true;
-			// });
-			// thread.Start();
-			// BuildMeshData();
-			// meshReady = true;
-		}
-	}
+    private float vertexAO(int side1, int side2, int corner)
+    {
+        int r = 0;
+        if (side1 == 1 && side2 == 1){
+            r = 0;
+        }else{
+            r = 3 - (side1 + side2 + corner);
+        }
+        switch (r){
+            case 0:
+                return 0.7f;
+            case 1:
+                return 0.8f;
+            case 2:
+                return 0.85f;
+            case 3:
+                return 1f;
+            default:
+                return 1f;
+        }
+    }
 
-	private float vertexAO(int side1, int side2, int corner) {
-		int r = 0;
-	  if(side1 == 1 && side2 == 1) {
-	    r = 0;
-	  }else{
-	  	r = 3 - (side1 + side2 + corner);
-	  }
-	  // if(side1 + side2 == 0 && corner != 0){
-	  // 	r = 3;
-	  // }
-	  switch (r) 
-	  {
-	  	case 0:
-	  		return 0.7f;
-	  	case 1:
-	  		return 0.8f;
-	  	case 2:
-	  		return 0.85f;
-	  	case 3:
-	  		return 1f;
-	  	default:
-	  		return 1f;
-	  }
-	}
-
-	public void BuildMeshData(){
-		for(int x = 0; x < Size; x++){
-			for(int y = 0; y < Size; y++){
-				for(int z = 0; z < Size; z++){
-					int block = GetBlock(x, y, z);
-					if (block != 0) {
+    public void BuildMeshData() {
+        for (int x = 0; x < Size; x++) {
+            for (int y = 0; y < Size; y++) {
+                for (int z = 0; z < Size; z++) {
+                    int block = GetBlock(x, y, z);
+                    if (block != 0) {
 						int top = GetBlock(x, y + 1, z);
 						int bot = GetBlock(x, y - 1, z);
 						int front = GetBlock(x, y, z + 1);
 						int back = GetBlock(x, y, z - 1);
 						int left = GetBlock(x + 1, y, z);
 						int right = GetBlock(x - 1, y, z);
-						Color color = Color.blue;
+						Color color = GetBlockColor(x, y, z);
 						int side1;
 						int side2;
 						int corner;
@@ -107,14 +84,6 @@ public class Chunk : MonoBehaviour{
 						float ao2;
 						float ao3;
 						float ao4;
-						if (block == 1) {
-							color = Color.green;
-							color.r = Mathf.Min(0.4f, Mathf.PerlinNoise((pos.x * 32f + x) / 25.05f, (pos.z * 32f + z) / 25.05f));
-							color.g -= Mathf.Min(0.4f, Mathf.PerlinNoise((pos.x * 32f + x) / 85.05f, (pos.z * 32f + z) / 85.05f));
-
-						} else if (block == 2) {
-							color = new Color32(128, 91, 61, 255);
-						}
 						Vector3 vPos = new Vector3(x, y, z);
 						Color[] colors;
 						if (top == 0) {
@@ -599,20 +568,8 @@ public class Chunk : MonoBehaviour{
 							}
 						}
 					}
-				}
-			}
-		}
-	}
-	
-
-	public void RenderMesh(){
-		filter.mesh.Clear();
-		filter.mesh = new Mesh();
-		filter.mesh.vertices = meshData.vertices.ToArray();
-		filter.mesh.triangles = meshData.triangles.ToArray();
-		filter.mesh.colors = meshData.colors.ToArray();
-		filter.mesh.RecalculateNormals();
-        // coll.sharedMesh = filter.mesh;
-	}
-
+                }
+            }
+        }
+    }
 }

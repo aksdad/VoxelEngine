@@ -39,4 +39,7 @@ public struct mBlock {
     public static implicit operator bool (mBlock block) {
         return block.solid;
     }
+    public static implicit operator int (mBlock block){
+        return (block.solid) ? 1:0;
+    }
 }
