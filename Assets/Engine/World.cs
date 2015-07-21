@@ -136,19 +136,34 @@ public class World : MonoBehaviour{
        
         return dirtHeight;
     }
+
+    class TaskInfo{
+        public Chunk chunk;
+        public Vector3 pos;
+
+        public TaskInfo(Chunk chunk, Vector3 pos) {
+            this.chunk = chunk;
+            this.pos = pos;
+        }
+
+    }
+
     public void CreateChunk(Vector3 pos){
     	GameObject newChunk = Instantiate(chunkPrefab, new Vector3(pos.x * 32f, pos.y * 32f, pos.z * 32f), Quaternion.Euler(Vector3.zero)) as GameObject;
     	Chunk chunk = newChunk.GetComponent<Chunk>();
     	chunk.pos = pos;
     	chunk.loaded = true;
     	chunks.Add(pos, chunk);
-    	Thread thread = new Thread(()=>{
+        ThreadPool.QueueUserWorkItem(new WaitCallback(GenerateChunk), new TaskInfo(chunk, pos));
+        /*Thread thread = new Thread(()=>{
     			GenerateChunk(pos, chunk);	
     	});
-    	thread.Start();	
+    	thread.Start();*/
     }
 
-    private void GenerateChunk(Vector3 pos, Chunk chunk){
+    public void GenerateChunk(object stateInfo){
+        Vector3 pos = ((TaskInfo)stateInfo).pos;
+        Chunk chunk = ((TaskInfo)stateInfo).chunk;
 		for(int x = 0; x < Chunk.Size; x++){
 			for(int z = 0; z < Chunk.Size; z++){
     			// float n = Noise.Generate((pos.x + x)/32f, pos.y, (pos.z + z)/45f);
