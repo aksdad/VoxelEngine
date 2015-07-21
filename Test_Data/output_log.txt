@@ -8,6 +8,8 @@ Direct3D:
 Begin MonoManager ReloadAssembly
 Platform assembly: C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\UnityEngine.dll (this message is harmless)
 Loading C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\Assembly-CSharp-firstpass.dll (this message is harmless)
+Loading C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\Assembly-CSharp-firstpass.dll into Unity Child Domain
 Platform assembly: C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\Assembly-CSharp.dll (this message is harmless)
 Loading C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
 Platform assembly: C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\UnityEngine.UI.dll (this message is harmless)
@@ -16,7 +18,7 @@ Platform assembly: C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\Unity
 Loading C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
 Platform assembly: C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\UnityEngine.Analytics.dll (this message is harmless)
 Loading C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
-- Completed reload, in  0.103 seconds
+- Completed reload, in  0.049 seconds
 desktop: 1920x1080 60Hz; virtual: 3200x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
@@ -24,4 +26,4 @@ desktop: 1920x1080 60Hz; virtual: 3200x1080 at 0,0
 Platform assembly: C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: C:\Users\Akshay\Documents\VoxelEngine\Test_Data\Managed\System.dll (this message is harmless)
 Setting up 1 worker threads for Enlighten.
-  Thread -> id: 1f2c -> priority: 1 
+  Thread -> id: 10ccc -> priority: 1 

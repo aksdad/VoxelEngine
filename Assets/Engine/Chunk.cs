@@ -11,7 +11,7 @@ public class Chunk : MonoBehaviour{
 	public bool rendered = false;
 	public bool busy = false;
 	public bool delete = false;
-	private bool meshReady = false;
+	public bool meshReady = false;
 	public bool loaded = false;
 	public Vector3 pos;
 	MeshData meshData = new MeshData();
@@ -28,6 +28,7 @@ public class Chunk : MonoBehaviour{
 
 	void Update(){
 		if(delete){
+			Destroy(filter.sharedMesh);
 			Destroy(gameObject);
 		}
 
@@ -42,14 +43,7 @@ public class Chunk : MonoBehaviour{
 	public Block GetBlock(float x, float y, float z){
 		if(x >= Size || y >= Size || z >= Size || x < 0 || y < 0 || z < 0)
 			return new Block(0);
-		Block block = new Block(0);
-		// try{            
-            block = blocks[(int)x, (int)y, (int)z];
-        // }
-
-        // catch (Exception e){
-        //     Debug.Log(x + "  " + y + " " + z);
-        // }
+		Block block = blocks[(int)x, (int)y, (int)z];
 		return block;
 	}
 
@@ -58,11 +52,11 @@ public class Chunk : MonoBehaviour{
 			rendered = true;
 			busy = true;
 			//TODO: Thread this part
-			Thread thread = new Thread(()=>{
+			// Thread thread = new Thread(()=>{
 				BuildMeshData();
 				meshReady = true;
-			});
-			thread.Start();
+			// });
+			// thread.Start();
 			// BuildMeshData();
 			// meshReady = true;
 		}
@@ -114,11 +108,28 @@ public class Chunk : MonoBehaviour{
 						float ao2;
 						float ao3;
 						float ao4;
-						if(block == 1)
+						if(block == 1){
 							color = Color.green;
-						else if(block == 2)
-							color = Color.grey;
-						pos = new Vector3(x, y, z);
+                            //color.g -= 0.2f;
+                            color.r = Mathf.Min(0.4f,Mathf.PerlinNoise((pos.x * 32f + x)/25.05f, (pos.z * 32f + z)/ 25.05f));
+                            color.g -= Mathf.Min(0.4f, Mathf.PerlinNoise((pos.x * 32f + x)/85.05f, (pos.z * 32f + z)/ 85.05f));
+                            //Debug.Log(color.r);
+                            //color = new Color((float)96f/255f, (float)159f/255f, (float)112f/255f, 1f);
+                            // color.r += 0.3f;
+                            // color.b += 0.3f;
+                            // int r = World.GetNoise((Mathf.FloorToInt(pos.x * 32f) + x), (Mathf.FloorToInt(pos.y * 32f) + y), (Mathf.FloorToInt(pos.z * 32f) + z),  0.03f, 255, 1);
+                            // int b = World.GetNoise(Mathf.FloorToInt(pos.x * 32f) + x, Mathf.FloorToInt(pos.y * 32f) + y, Mathf.FloorToInt(pos.z * 32f) + z,  0.22f, 100, 1);
+                            // r  = (int)Mathf.Max(0f, (float)(r-30));
+                            // Debug.Log(r);
+                            // color.g = g/255f;
+                            // color.r = r/255f;
+                            // color.b += (float)(b/255f);
+                            // Debug.Log(color.r);
+                        }
+						else if(block == 2){
+							color = new Color32(128, 91, 61, 255);
+						}
+						Vector3 vPos = new Vector3(x, y, z);
 						Color[] colors;
 						if( top == 0)
 						{
@@ -148,11 +159,11 @@ public class Chunk : MonoBehaviour{
 							colors[3] = new Color(color.r * ao4, color.g * ao4, color.b * ao4, color.a);
 
 							if(ao1 + ao3 < ao2 + ao4){
-                        		meshData.CreateFace(pos, new Vector3(0,1,0), new Vector3(0,1,1), new Vector3(1,1,1), new Vector3(1,1,0), colors, true);
+                        		meshData.CreateFace(vPos, new Vector3(0,1,0), new Vector3(0,1,1), new Vector3(1,1,1), new Vector3(1,1,0), colors, true);
                         		// Debug.Log("flipped");
 							}
                         	else
-                        		meshData.CreateFace(pos, new Vector3(0,1,0), new Vector3(0,1,1), new Vector3(1,1,1), new Vector3(1,1,0), colors, false);
+                        		meshData.CreateFace(vPos, new Vector3(0,1,0), new Vector3(0,1,1), new Vector3(1,1,1), new Vector3(1,1,0), colors, false);
 						}
 						if( front == 0)
 						{
@@ -181,9 +192,9 @@ public class Chunk : MonoBehaviour{
 							ao4 = vertexAO(side1, side2, corner);
 							colors[3] = new Color(color.r * ao4, color.g * ao4, color.b * ao4, color.a);
 							if(ao1 + ao3 < ao2 + ao4){
-					    		meshData.CreateFace(pos, new Vector3(0,0,1), new Vector3(1,0,1), new Vector3(1,1,1), new Vector3(0,1,1), colors, true);
+					    		meshData.CreateFace(vPos, new Vector3(0,0,1), new Vector3(1,0,1), new Vector3(1,1,1), new Vector3(0,1,1), colors, true);
 					    	}else{
-					    		meshData.CreateFace(pos, new Vector3(0,0,1), new Vector3(1,0,1), new Vector3(1,1,1), new Vector3(0,1,1), colors, false);
+					    		meshData.CreateFace(vPos, new Vector3(0,0,1), new Vector3(1,0,1), new Vector3(1,1,1), new Vector3(0,1,1), colors, false);
 					    	}	
 						}
 						
@@ -214,9 +225,9 @@ public class Chunk : MonoBehaviour{
 							ao4 = vertexAO(side1, side2, corner);
 							colors[3] = new Color(color.r * ao4, color.g * ao4, color.b * ao4, color.a);
 							if(ao1 + ao3 < ao2 + ao4){
-					    		meshData.CreateFace(pos, new Vector3(1,0,0), new Vector3(1,1,0), new Vector3(1,1,1), new Vector3(1,0,1), colors, true);
+					    		meshData.CreateFace(vPos, new Vector3(1,0,0), new Vector3(1,1,0), new Vector3(1,1,1), new Vector3(1,0,1), colors, true);
 					    	}else{
-					    		meshData.CreateFace(pos, new Vector3(1,0,0), new Vector3(1,1,0), new Vector3(1,1,1), new Vector3(1,0,1), colors, false);
+					    		meshData.CreateFace(vPos, new Vector3(1,0,0), new Vector3(1,1,0), new Vector3(1,1,1), new Vector3(1,0,1), colors, false);
 					    	}
 						}
 					 		
@@ -245,14 +256,14 @@ public class Chunk : MonoBehaviour{
 							if(GetBlock(x + 1, y - 1, z - 1) != 0){corner = 1;}else{corner = 0;}
 							ao4 = vertexAO(side1, side2, corner);
 
-							if(x == 3 && z == 2)
-								Debug.Log(ao4);
+							// if(x == 3 && z == 2)
+							// 	Debug.Log(ao4);
 							
 							colors[3] = new Color(color.r * ao4, color.g * ao4, color.b * ao4, color.a);
 							if(ao1 + ao3 > ao2 + ao4){
-					    		meshData.CreateFace(pos, new Vector3(0,0,0), new Vector3(0,1,0), new Vector3(1,1,0), new Vector3(1,0,0), colors, true);
+					    		meshData.CreateFace(vPos, new Vector3(0,0,0), new Vector3(0,1,0), new Vector3(1,1,0), new Vector3(1,0,0), colors, true);
 					    	}else{
-					    		meshData.CreateFace(pos, new Vector3(0,0,0), new Vector3(0,1,0), new Vector3(1,1,0), new Vector3(1,0,0), colors, false);
+					    		meshData.CreateFace(vPos, new Vector3(0,0,0), new Vector3(0,1,0), new Vector3(1,1,0), new Vector3(1,0,0), colors, false);
 					    	}
 						}
 					
@@ -287,9 +298,9 @@ public class Chunk : MonoBehaviour{
 							colors[3] = new Color(color.r * ao4, color.g * ao4, color.b * ao4, color.a);
 							
 							if(ao1 + ao3 < ao2 + ao4){
-								meshData.CreateFace(pos, new Vector3(0,0,1), new Vector3(0,1,1), new Vector3(0,1,0), new Vector3(0,0,0), colors, true);	
+								meshData.CreateFace(vPos, new Vector3(0,0,1), new Vector3(0,1,1), new Vector3(0,1,0), new Vector3(0,0,0), colors, true);	
 							}else{
-								meshData.CreateFace(pos, new Vector3(0,0,1), new Vector3(0,1,1), new Vector3(0,1,0), new Vector3(0,0,0), colors, false);
+								meshData.CreateFace(vPos, new Vector3(0,0,1), new Vector3(0,1,1), new Vector3(0,1,0), new Vector3(0,0,0), colors, false);
 							}
 						}
 					
@@ -320,9 +331,9 @@ public class Chunk : MonoBehaviour{
 							ao4 = vertexAO(side1, side2, corner);
 							colors[3] = new Color(color.r * ao4, color.g * ao4, color.b * ao4, color.a);
 							if(ao1 + ao3 < ao2 + ao4){
-								meshData.CreateFace(pos, new Vector3(0,0,0), new Vector3(1,0,0), new Vector3(1,0,1), new Vector3(0,0,1), colors, true);
+								meshData.CreateFace(vPos, new Vector3(0,0,0), new Vector3(1,0,0), new Vector3(1,0,1), new Vector3(0,0,1), colors, true);
 							}else{
-								meshData.CreateFace(pos, new Vector3(0,0,0), new Vector3(1,0,0), new Vector3(1,0,1), new Vector3(0,0,1), colors, false);
+								meshData.CreateFace(vPos, new Vector3(0,0,0), new Vector3(1,0,0), new Vector3(1,0,1), new Vector3(0,0,1), colors, false);
 							}
 						}
 					}
@@ -338,6 +349,7 @@ public class Chunk : MonoBehaviour{
 		filter.mesh.triangles = meshData.triangles.ToArray();
 		filter.mesh.colors = meshData.colors.ToArray();
 		filter.mesh.RecalculateNormals();
+        // coll.sharedMesh = filter.mesh;
 	}
 
 }

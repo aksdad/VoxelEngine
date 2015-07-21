@@ -6,7 +6,7 @@ using System.Threading;
 public class World : MonoBehaviour{
 	private static World _instance;
 	public GameObject chunkPrefab;
-	public Chunk[,,] chunks = new Chunks[13, 3, 13];
+	public Dictionary<Vector3, Chunk> chunks = new Dictionary<Vector3, Chunk>();
     public static World instance
     {
         get
@@ -34,8 +34,44 @@ public class World : MonoBehaviour{
     void Update(){
     }
     public void DestroyChunk(Chunk chunk){
-    	// chunks.Remove(chunk.pos);
-    	chunk.delete = true;
+    	Chunk containerChunk = null, temp;
+        chunks.TryGetValue(chunk.pos, out containerChunk);
+        if(containerChunk != null){
+    		chunks.Remove(containerChunk.pos);
+    		temp = containerChunk;
+    		// Debug.Log(temp.pos);
+    		chunks.TryGetValue(new Vector3(containerChunk.pos.x, 1, containerChunk.pos.z), out containerChunk);
+    		temp.delete = true;
+	        if(containerChunk != null){
+	    		chunks.Remove(containerChunk.pos);
+	    		temp = containerChunk;
+	    		chunks.TryGetValue(new Vector3(containerChunk.pos.x, 1, containerChunk.pos.z), out containerChunk);
+	    		temp.delete = true;
+		        if(containerChunk != null){
+		    		chunks.Remove(containerChunk.pos);
+		    		containerChunk.delete = true;
+		    	}
+	    	}
+    	}
+    }
+
+    public void DestroyChunk(Vector3 pos){
+    	Chunk containerChunk = null;
+        chunks.TryGetValue(pos, out containerChunk);
+        if(containerChunk != null){
+    		chunks.Remove(pos);
+    		containerChunk.delete = true;
+    		chunks.TryGetValue(new Vector3(pos.x, -1, pos.z), out containerChunk);
+	        if(containerChunk != null){
+	    		chunks.Remove(pos);
+	    		containerChunk.delete = true;
+	    		chunks.TryGetValue(new Vector3(pos.x, 1, pos.z), out containerChunk);
+		        if(containerChunk != null){
+		    		chunks.Remove(pos);
+		    		containerChunk.delete = true;
+		    	}
+	    	}
+    	}
     }
     private void MakeTestChunkAO(){
     	GameObject newChunk = Instantiate(chunkPrefab, new Vector3(0 , 0, 0), Quaternion.Euler(Vector3.zero)) as GameObject;
@@ -105,7 +141,7 @@ public class World : MonoBehaviour{
     	Chunk chunk = newChunk.GetComponent<Chunk>();
     	chunk.pos = pos;
     	chunk.loaded = true;
-    	// chunks.Add(pos, chunk);
+    	chunks.Add(pos, chunk);
     	Thread thread = new Thread(()=>{
     			GenerateChunk(pos, chunk);	
     	});
@@ -115,20 +151,37 @@ public class World : MonoBehaviour{
     private void GenerateChunk(Vector3 pos, Chunk chunk){
 		for(int x = 0; x < Chunk.Size; x++){
 			for(int z = 0; z < Chunk.Size; z++){
+    			// float n = Noise.Generate((pos.x + x)/32f, pos.y, (pos.z + z)/45f);
 				int stoneHeight = LayerStoneBase((int)(pos.x*32f) + x, (int)(pos.z*32f) + z);
 		        stoneHeight += LayerStoneNoise((int)(pos.x*32f) + x, (int)(pos.z*32f) + z);
 
 		        int dirtHeight = stoneHeight + LayerDirt((int)(pos.x*32f) + x, (int)(pos.z*32f) + z);
+				// Debug.Log(height);
 				for(int y = 0; y < Chunk.Size; y++){
 					int i;
+					// if(y > 5 && y < 20){
+					// 	chunk.blocks[x, y, z] = new Block(1);
+					// 	// Debug.Log(chunk.blocks[x, y, z]);
+					// }
+					// else {
+					// 	chunk.blocks[x, y, z] = new Block(0);
+					// }
 					if(y + (pos.y*32f) < dirtHeight){
 						chunk.blocks[x, y, z] = new Block(1);
 						if(y + (pos.y*32f) < stoneHeight){
-							chunk.blocks[x, y, z] = new Block(2);
+							chunk.blocks[x, y, z] = new Block(1);
 						}
 					}else{
 						chunk.blocks[x, y, z] = new Block(0);
 					}
+
+					// for(i = 0; i < y; i++){
+					// 	chunk.blocks[x, i, z] = new Block(1);
+					// }
+
+					// for(int j = i; j < 32; j++){
+					// 	chunk.blocks[x, j, z] = new Block(0);
+					// }
 				}
 			}
 		}
